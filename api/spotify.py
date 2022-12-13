@@ -5,7 +5,7 @@ import requests
 
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, Response, jsonify, render_template, templating, request
+from flask import Flask, Response, render_template, request
 
 load_dotenv(find_dotenv())
 
@@ -75,10 +75,15 @@ def barGen(barCount):
     barCSS = ""
     left = 1
     for i in range(1, barCount + 1):
-        anim = random.randint(1000, 1350)
+        anim = random.randint(500, 1000)
+        # below code generates random cubic-bezier values
+        x1 = random.random()
+        y1 = random.random()*2
+        x2 = random.random()
+        y2 = random.random()*2
         barCSS += (
-            ".bar:nth-child({})  {{ left: {}px; animation-duration: {}ms; }}".format(
-                i, left, anim
+            ".bar:nth-child({})  {{ left: {}px; animation-duration: 15s, {}ms; animation-timing-function: ease, cubic-bezier({},{},{},{}); }}".format(
+                i, left, anim, x1, y1, x2, y2
             )
         )
         left += 4
@@ -91,7 +96,7 @@ def getTemplate():
         templates = json.loads(file.read())
         return templates["templates"][templates["current-theme"]]
     except Exception as e:
-        print(f"Failed to load templates.")
+        print(f"Failed to load templates.\r\n```{e}```")
         return FALLBACK_THEME
 
 
@@ -106,8 +111,8 @@ def makeSVG(data, background_color, border_color):
     barCSS = barGen(barCount)
 
     if data == {} or data["item"] == "None" or data["item"] is None:
-        # contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
-        currentStatus = "Was playing:"
+        #contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
+        currentStatus = "Recently played:"
         recentPlays = recentlyPlayed()
         recentPlaysLength = len(recentPlays["items"])
         itemIndex = random.randint(0, recentPlaysLength - 1)
